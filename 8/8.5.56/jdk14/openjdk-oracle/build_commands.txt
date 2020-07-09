@@ -1,0 +1,4 @@
+docker login
+docker build --tag sibvisions/tomcat:8.5.56-jdk14-openjdk-oracle .
+docker push sibvisions/tomcat:8.5.56-jdk14-openjdk-oracle
+docker logout
