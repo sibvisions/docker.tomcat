@@ -86,6 +86,36 @@ _main()
   <user username=\"$TOMCAT_USER\" password=\"$TOMCAT_PWD\" roles=\"manager-gui,manager-script\"/>\n\
 </tomcat-users>" > /usr/local/tomcat/conf/tomcat-users.xml
 
+#    if [ ! -z "$TOMCAT_SSL_CERT_PKCS7" ]; then
+#      echo "-----BEGIN PKCS7-----" > /usr/local/tomcat/conf/certificate.pkcs
+#      echo "$TOMCAT_SSL_CERT_PKCS7" | sed 's/\s\+/\n/g' | head -n -2 | tail -n +3 >> /usr/local/tomcat/conf/certificate.pkcs
+#      echo "-----END PKCS7-----" >> /usr/local/tomcat/conf/certificate.pkcs
+#
+#      openssl pkcs7 -print_certs -in /usr/local/tomcat/conf/certificate.pkcs -out /usr/local/tomcat/conf/certificate.cert
+#      keytool -import -trustcacerts -alias tomcat -file /usr/local/tomcat/conf/certificate.cert -keystore /usr/local/tomcat/conf/keystore -storepass $TOMCAT_SSL_CERT_PWD -noprompt
+#
+#      rm /usr/local/tomcat/conf/certificate.pkcs
+#
+#      declare oldValue="<!--\n    <Connector port=\"8443\""
+#      declare newValue="<Connector port=\"8443\" protocol=\"HTTP\/1.1\" SSLEnabled=\"true\" maxThreads=\"150\" scheme=\"https\" secure=\"true\" keystoreFile=\"conf\/keystore\" keystorePass=\"$TOMCAT_SSL_CERT_PWD\" keyAlias=\"tomcat\" clientAuth=\"false\" sslProtocol=\"TLS\" \/>\n<!--\n    <Connector port=\"8443\""
+#            
+#      sed -z 's/'"$oldValue"'/'"$newValue"'/g' -i /usr/local/tomcat/conf/server.xml 
+#
+#      export TOMCAT_SSL_CERT_PKCS7=""
+#      export TOMCAT_SSL_CERT_PWD=""
+#    fi
+
+    if [ ! -z "$TOMCAT_KEYSTORE" ]; then
+
+      echo $TOMCAT_KEYSTORE | base64 -d > /usr/local/tomcat/conf/keystore
+
+      declare oldValue="<!--\n    <Connector port=\"8443\""
+      declare newValue="<Connector port=\"8443\" protocol=\"HTTP\/1.1\" SSLEnabled=\"true\" maxThreads=\"150\" scheme=\"https\" secure=\"true\" keystoreFile=\"conf\/keystore\" keystorePass=\"$TOMCAT_KEYSTORE_PWD\" keyAlias=\"tomcat\" clientAuth=\"false\" sslProtocol=\"TLS\" \/>\n<!--\n    <Connector port=\"8443\""
+
+      sed -z 's/'"$oldValue"'/'"$newValue"'/1' -i /usr/local/tomcat/conf/server.xml 
+
+    fi
+
     declare r1=$(prop 'http' 8080)
     declare r2=$(prop 'https' 8443)
     declare r3=$(prop 'ajp' 8009)
