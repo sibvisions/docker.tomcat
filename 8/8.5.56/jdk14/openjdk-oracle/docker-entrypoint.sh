@@ -29,10 +29,13 @@ _main()
   if [ "$1" = 'catalina.sh' ]; then
 
     if [ -d "/usr/local/tomcat/webapps.dist/manager" ]; then
-      mv /usr/local/tomcat/webapps.dist/manager /usr/local/tomcat/webapps/manager
-      sed -i 's/52428800/104857600/g' /usr/local/tomcat/webapps/manager/WEB-INF/web.xml
 
-      echo -e "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\
+     if [ ! -d "/usr/local/tomcat/webapps/manager" ]; then
+
+        mv /usr/local/tomcat/webapps.dist/manager /usr/local/tomcat/webapps/manager
+        sed -i 's/52428800/104857600/g' /usr/local/tomcat/webapps/manager/WEB-INF/web.xml
+
+        echo -e "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\
 <!--\n\
   Licensed to the Apache Software Foundation (ASF) under one or more\n\
   contributor license agreements.  See the NOTICE file distributed with\n\
@@ -57,12 +60,25 @@ _main()
   <Manager sessionAttributeValueClassNameFilter=\"java\.lang\.(?:Boolean|Integer|Long|Number|String)|org\.apache\.catalina\.filters\.CsrfPreventionFilter\$LruCache(?:\$1)\n\?|java\.util\.(?:Linked)?HashMap\"/>\n\
 </Context>" > /usr/local/tomcat/webapps/manager/META-INF/context.xml
 
+        echo
+        echo 'Manager application deployed;'
+        echo
+      else
+        echo
+        echo 'Manager application already available;'
+        echo        
+      fi
+
+      rm -rf /usr/local/tomcat/webapps.dist
+
       echo
-      echo 'Manager application deployed;'
-      echo
+      echo 'Dist web applications removed;'
+      echo        
+
     fi
 
-    echo -e "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\
+    if ! grep -q \"$TOMCAT_USER\" "/usr/local/tomcat/conf/tomcat-users.xml"; then
+      echo -e "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\
 <!--\n\
   Licensed to the Apache Software Foundation (ASF) under one or more\n\
   contributor license agreements.  See the NOTICE file distributed with\n\
@@ -85,6 +101,11 @@ _main()
 \n\
   <user username=\"$TOMCAT_USER\" password=\"$TOMCAT_PWD\" roles=\"manager-gui,manager-script\"/>\n\
 </tomcat-users>" > /usr/local/tomcat/conf/tomcat-users.xml
+
+        echo
+        echo 'Admin user configured;'
+        echo
+     fi
 
 #    if [ ! -z "$TOMCAT_SSL_CERT_PKCS7" ]; then
 #      echo "-----BEGIN PKCS7-----" > /usr/local/tomcat/conf/certificate.pkcs
@@ -114,7 +135,41 @@ _main()
 
       sed -z 's/'"$oldValue"'/'"$newValue"'/1' -i /usr/local/tomcat/conf/server.xml 
 
+      echo
+      echo 'Keystore installed;'
+      echo
     fi
+
+    # logrotation
+
+    echo -e "/usr/local/tomcat/logs/catalina.out {\n\
+    daily\n\
+    rotate $TOMCAT_LOGDAYS\n\
+    notifempty\n\
+    missingok\n\
+    copytruncate\n\
+    compress\n\
+}\n\n\
+/usr/local/tomcat/logs/*.log {\n\
+    daily\n\
+    missingok\n\
+    copytruncate\n\
+    rotate $TOMCAT_LOGDAYS\n\
+    missingok\n\
+    compress\n\
+}\n\n\
+/usr/local/tomcat/logs/*.txt {\n\
+    daily\n\
+    missingok\n\
+    copytruncate\n\
+    rotate $TOMCAT_LOGDAYS\n\
+    missingok\n\
+    compress\n\
+}\n" > /etc/logrotate.d/tomcat
+
+    echo
+    echo 'Logrotation configured;'
+    echo
 
     declare r1=$(prop 'http' 8080)
     declare r2=$(prop 'https' 8443)
