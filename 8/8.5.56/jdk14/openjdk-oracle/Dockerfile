@@ -1,7 +1,7 @@
 FROM tomcat:8.5.56-jdk14-openjdk-oracle
 MAINTAINER sibvisions
 
-RUN yum install -y mc openssl
+RUN yum install -y mc openssl postgresql
 
 ENV TOMCAT_HTTP_PORT 8080
 ENV TOMCAT_HTTPS_PORT 8443
