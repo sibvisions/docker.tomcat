@@ -1,0 +1,4 @@
+docker login
+docker build --platform linux/amd64 --tag sibvisions/tomcat:9.0.73-jdk17-temurin .
+docker push sibvisions/tomcat:9.0.73-jdk17-temurin
+docker logout
