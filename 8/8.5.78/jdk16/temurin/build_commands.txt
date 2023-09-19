@@ -1,6 +1,6 @@
 docker login
 docker buildx create --name jrbuilder
-docker buildx use mybuilder
+docker buildx use jrbuilder
 docker buildx inspect --bootstrap
 docker buildx build --tag sibvisions/tomcat:8.5.78-jdk16-temurin --platform linux/amd64,linux/arm64,linux/arm/v7 --push .
 docker logout
