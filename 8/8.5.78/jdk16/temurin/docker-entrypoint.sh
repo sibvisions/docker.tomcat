@@ -77,7 +77,7 @@ _main()
 
     fi
 
-    if ! grep -q \"$TOMCAT_USER\" "/usr/local/tomcat/conf/tomcat-users.xml"; then
+    if grep -q \"\<must-be-changed\>\" "/usr/local/tomcat/conf/tomcat-users.xml"; then
       echo -e "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\
 <!--\n\
   Licensed to the Apache Software Foundation (ASF) under one or more\n\
