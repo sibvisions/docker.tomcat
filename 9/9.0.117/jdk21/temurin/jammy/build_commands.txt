@@ -1,0 +1,19 @@
+docker buildx rm tombuilder
+docker buildx create --name tombuilder
+docker buildx ls
+docker buildx use tombuilder
+docker buildx inspect --bootstrap
+#platforms depend on base image -> see hub.docker.com
+
+#no push
+docker buildx build -o type=image --tag sibvisions/tomcat:9.0.105-jdk21-temurin-jammy --platform=linux/amd64,linux/arm64/v8 .
+
+docker login
+
+#push
+docker buildx build -o type=image --push --tag sibvisions/tomcat:9.0.105-jdk21-temurin-jammy --platform=linux/amd64,linux/arm64/v8 .
+docker logout
+
+
+# Simple build for current arch
+docker build --tag sibvisions/tomcat:9.0.105-jdk21-temurin-jammy .
